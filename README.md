@@ -4,7 +4,7 @@ This preprocessor for Markdown builds references block usable to view on screen 
 
 ## Why?
 
-I need to write and edit my dissertation splitting it onto several Markdown files and use GOST R 7.0.5-2008 (ÃÎÑÒ Ð 7.0.5—2008), Russian citation format.
+I need to write and edit my dissertation splitting it onto several Markdown files and use GOST R 7.0.5-2008 (Ð“ÐžÐ¡Ð¢ Ð  7.0.5â€”2008), Russian citation format.
 
 ## Example
 
@@ -36,7 +36,7 @@ And after parsing resulting markdown file you will get:
 <h3>References</h3>
 
 <ol>
-  <li><a name="a-knuth"></a> Knuth D. The Art of Computer Programming, 1: Fundamental Algorithms (3rd ed.). — USA: Addison-Wesley Professional, 1997. — ISBN 0-201-89683-4.</li>
+  <li><a name="a-knuth"></a> Knuth D. The Art of Computer Programming, 1: Fundamental Algorithms (3rd ed.). â€” USA: Addison-Wesley Professional, 1997. â€” ISBN 0-201-89683-4.</li>
 </ol>
 ```
 
