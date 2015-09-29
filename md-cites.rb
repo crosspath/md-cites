@@ -2,7 +2,7 @@ module MainApp
   class CitesParser
     RE_REF_SECTION = /^\s*#ref\s*$/
     RE_CITE_DEFINITION = /^\s*#cite\s+(?<identifier>.*?):\s*(?<text>.*)\s*$/
-    RE_CITING = /\[cite:\s*(.*?)\]/
+    RE_CITING = /\[cite:\s*(?<identifier>.*?)(?<options>,\s*.*?)?\]/
     
     attr_reader :new_contents
     attr_accessor :input_file
@@ -26,14 +26,15 @@ module MainApp
             @cites_texts[matches['identifier'].strip] = matches['text']
           else
             new_line = line.gsub(RE_CITING) do |substring|
-              identifier = substring.match(RE_CITING)[1]
-              identifier.strip!
+              citing = substring.match(RE_CITING)
+              identifier = citing['identifier'].strip
+              options = citing['options'] && citing['options'].strip
               unless @cites_numbers.key?(identifier)
                 @cites_numbers[identifier] = @next_number
                 @next_number += 1
               end
               ref_number = @cites_numbers[identifier]
-              cite_format(ref_number, identifier)
+              cite_format(ref_number, identifier, options)
             end
             @new_contents << new_line
           end
@@ -49,8 +50,8 @@ module MainApp
       @next_number = 1
     end
     
-    def cite_format(ref_number, identifier)
-      "[[#{ref_number}]](##{@chapter}-#{identifier})"
+    def cite_format(ref_number, identifier, options = nil)
+      "[[#{ref_number}#{options}]](##{@chapter}-#{identifier})"
     end
     
     def ref_format(identifier)

@@ -52,9 +52,13 @@ Sentence [[1]](#a-knuth).
 
 ## Usage
 
-Use it after [markdown-include](https://github.com/sethen/markdown-include).
+If you use [markdown-include](https://github.com/sethen/markdown-include), run `md-cites` after it.
 
     ruby md-cites.rb input_file.md output_file.md
+
+## Features
+
+### Split references
 
 You may split references list on parts:
 ```markdown
@@ -82,4 +86,29 @@ Result:
 
 It's usable for putting references list at the end of each chapter.
 
-At present, this script orders references list only by mention. Well, it's good to sort it by alphabet too.
+At present, this script orders references list only by mention.
+
+### Extra info
+
+You may append page numbers to a cite:
+```markdown
+[cite: abc, p. 123]
+#cite abc: Source 1.
+
+#ref
+```
+
+Result:
+```markdown
+[[1, p. 123]](#a-abc)
+
+1. <a name="a-abc"></a> Source 1.
+```
+
+## What should not be done
+
+Add `#ref`-like command to build references list sorted by alphabet.
+
+Cites before `#ref`-like command should look like `Sentence [Surname, year]`, `Sentence [Surname, year, page]` and `Sentence [Surname1, year1; Surname2, year2]`.
+
+This script should not implement it because of its complexity. In this case you may use separate file with references.
