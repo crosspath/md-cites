@@ -1,8 +1,12 @@
+Encoding.default_external = Encoding::UTF_8
+
 module MainApp
   class CitesParser
     RE_REF_SECTION = /^\s*#ref\s*$/
     RE_CITE_DEFINITION = /^\s*#cite\s+(?<identifier>.*?):\s*(?<text>.*)\s*$/
     RE_CITING = /\[cite:\s*(?<identifier>.*?)(?<options>,\s*.*?)?\]/
+    LOCALE_ENCODING = Encoding.find('locale')
+    FS_ENCODING = Encoding.find('filesystem')
     
     attr_reader :new_contents
     attr_accessor :input_file
@@ -12,7 +16,7 @@ module MainApp
     end
     
     def run
-      contents = File.read(input_file)
+      contents = File.read(@input_file.encode(FS_ENCODING))
       @new_contents = []
       @chapter = 'a'
       reset_cites
@@ -89,6 +93,14 @@ module MainApp
   end
   
   def run(input_file, output_file)
+    # По неведомой мне причине Ruby принимает от Windows
+    # аргументы в кодировке 1251 под видом 866.
+    if RUBY_PLATFORM =~ /win32|mingw32/
+      fs_encoding = Encoding.find('filesystem')
+      input_file = input_file.dup.force_encoding(fs_encoding)
+      output_file = output_file.dup.force_encoding(fs_encoding)
+    end
+    
     parser = CitesParser.new(input_file)
     parser.run
     
@@ -96,6 +108,7 @@ module MainApp
     puts "Finish"
   rescue => e
     STDERR.puts 'Error!', e.message
+    STDERR.puts e.backtrace
     exit(1)
   end
 end
