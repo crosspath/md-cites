@@ -4,7 +4,12 @@ module MainApp
   class CitesParser
     RE_REF_SECTION = /^\s*#ref\s*$/
     RE_CITE_DEFINITION = /^\s*#cite\s+(?<identifier>.*?):\s*(?<text>.*)\s*$/
-    RE_CITING = /\[cite:\s*(?<identifier>.*?)(?<options>,\s*.*?)?\]/
+    
+    RE_EXTRA_INFO = /(?<options>,\s*.*?)/
+    RE_FORMAT = /\|\s*(?<format>.*?)/
+    FORMAT_PLACEHOLDER = '%s'
+    RE_CITING = /\[cite:\s*(?<identifier>.*?)(?:#{RE_EXTRA_INFO}|#{RE_FORMAT})?\]/
+    
     LOCALE_ENCODING = Encoding.find('locale')
     FS_ENCODING = Encoding.find('filesystem')
     
@@ -30,15 +35,7 @@ module MainApp
             @cites_texts[matches['identifier'].strip] = matches['text']
           else
             new_line = line.gsub(RE_CITING) do |substring|
-              citing = substring.match(RE_CITING)
-              identifier = citing['identifier'].strip
-              options = citing['options'] && citing['options'].strip
-              unless @cites_numbers.key?(identifier)
-                @cites_numbers[identifier] = @next_number
-                @next_number += 1
-              end
-              ref_number = @cites_numbers[identifier]
-              cite_format(ref_number, identifier, options)
+              modify_citing(substring)
             end
             @new_contents << new_line
           end
@@ -48,14 +45,34 @@ module MainApp
       @new_contents = @new_contents.join
     end
     
+    def modify_citing(substring)
+      citing = substring.match(RE_CITING)
+      identifier = citing['identifier'].strip
+      options = citing['options'] && citing['options'].strip
+      format = citing['format'] && citing['format'].strip
+      
+      # no change, format is not respected
+      return substring if format && !format.include?(FORMAT_PLACEHOLDER)
+      
+      format = "%s#{options}" if options
+      
+      unless @cites_numbers.key?(identifier)
+        @cites_numbers[identifier] = @next_number
+        @next_number += 1
+      end
+      ref_number = @cites_numbers[identifier]
+      cite_format(ref_number, identifier, format)
+    end
+    
     def reset_cites
       @cites_numbers = {} # {identifier: output number, ...}
       @cites_texts = {} # {identifier: cite text, ...}
       @next_number = 1
     end
     
-    def cite_format(ref_number, identifier, options = nil)
-      "[[#{ref_number}#{options}]](##{@chapter}-#{identifier})"
+    def cite_format(ref_number, identifier, format = nil)
+      text = format ? format % ref_number : ref_number
+      "[[#{text}]](##{@chapter}-#{identifier})"
     end
     
     def ref_format(identifier)
