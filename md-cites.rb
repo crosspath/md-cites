@@ -93,7 +93,7 @@ module MainApp
     end
   
     def assert_cites(a, b)
-      intersection = a && b
+      intersection = a & b
       intersection_size = intersection.size
       equal = intersection_size == a.size && intersection_size == b.size
       unless equal
